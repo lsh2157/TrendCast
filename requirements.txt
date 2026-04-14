@@ -1,0 +1,9 @@
+flask
+pandas
+plotly
+pymongo
+psycopg2-binary
+requests
+pytrends
+textblob
+pyspark
