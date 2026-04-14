@@ -1,0 +1,7 @@
+keyword,keyword_group,trend_score,sentiment_score,news_count,google_trends_score,updated_at
+smartphone,categorical,88.2,0.42,145,91,2026-04-13
+laptop,categorical,79.4,0.35,121,82,2026-04-13
+Apple,company,91.7,0.51,173,89,2026-04-13
+NVIDIA,company,93.5,0.64,188,92,2026-04-13
+OLED monitor,feature_focused,72.6,0.39,84,74,2026-04-13
+mechanical keyboard,feature_focused,69.2,0.47,77,68,2026-04-13
