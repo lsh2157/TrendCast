@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrendCast Dashboard</title>
+</head>
+<body>
+    <h1>TrendCast Electronics Dashboard</h1>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Keyword</th>
+            <th>Group</th>
+            <th>Trend</th>
+            <th>Sentiment</th>
+            <th>News</th>
+            <th>Search</th>
+        </tr>
+
+        {% for row in records %}
+        <tr>
+            <td>{{ row.keyword }}</td>
+            <td>{{ row.keyword_group }}</td>
+            <td>{{ row.trend_score }}</td>
+            <td>{{ row.sentiment_score }}</td>
+            <td>{{ row.news_count }}</td>
+            <td>{{ row.google_trends_score }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
