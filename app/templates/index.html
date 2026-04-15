@@ -17,11 +17,9 @@
         {% for row in records %}
         <tr>
             <td>{{ row.keyword }}</td>
-            <td>{{ row.keyword_group }}</td>
             <td>{{ row.trend_score }}</td>
-            <td>{{ row.sentiment_score }}</td>
-            <td>{{ row.news_count }}</td>
-            <td>{{ row.google_trends_score }}</td>
+            <td>{{ row.score_date }}</td>
+            <td>{{ row.source }}</td>
         </tr>
         {% endfor %}
     </table>
