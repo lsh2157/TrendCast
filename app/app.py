@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    df = pd.read_csv("../outputs/sample_dashboard_data.csv")
+    df = pd.read_csv("../outputs/final_dashboard_data.csv")
     records = df.to_dict(orient="records")
     return render_template("index.html", records=records)
 
