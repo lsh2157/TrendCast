@@ -2,44 +2,60 @@
 <html>
 <head>
     <title>TrendCast Dashboard</title>
-    <p>This dashboard displays trend scores generated from market data across keywords and sources.</p>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 40px;
-        background-color: #f7f7f7;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f7f7f7;
+        }
 
-    h1 {
-        color: #333;
-    }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
 
-    table {
-        border-collapse: collapse;
-        width: 80%;
-        background: white;
-    }
+        p {
+            color: #444;
+            max-width: 900px;
+        }
 
-    th, td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-    }
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            background: white;
+            margin-top: 20px;
+        }
 
-    th {
-        background-color: #333;
-        color: white;
-    }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
 
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-</style>
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
     <h1>TrendCast Market Intelligence Dashboard</h1>
+    <p>This dashboard displays trend scores generated from market data across keywords and sources.</p>
 
-    <table border="1" cellpadding="8">
+    <table>
         <tr>
             <th>Keyword</th>
             <th>Trend Score</th>
@@ -57,5 +73,43 @@
         {% endfor %}
     </table>
 
+    <div class="chart-container">
+        <canvas id="trendChart"></canvas>
+    </div>
+
+    <script>
+        const labels = [
+            {% for row in records %}
+                "{{ row.keyword }}",
+            {% endfor %}
+        ];
+
+        const values = [
+            {% for row in records %}
+                {{ row.trend_score }},
+            {% endfor %}
+        ];
+
+        const ctx = document.getElementById('trendChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Trend Score',
+                    data: values
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
