@@ -3,8 +3,6 @@ import os
 
 sys.path.append(os.path.abspath(".."))
 
-import pandas as pd
-
 from flask import Flask, render_template, request
 from data_sources.mongodb.queries import get_latest_news
 
@@ -14,7 +12,7 @@ app = Flask(__name__)
 def home():
     query = request.args.get("q", "").lower()
 
-    raw_data = get_latest_news()
+    raw_data = get_latest_news(25)
 
     records = []
     for row in raw_data:
@@ -25,7 +23,6 @@ def home():
             "source": row.get("source", "N/A")
         }
 
-        # 🔍 filter logic
         if query:
             if query in record["keyword"].lower():
                 records.append(record)
@@ -33,7 +30,6 @@ def home():
             records.append(record)
 
     return render_template("index.html", records=records, query=query)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
