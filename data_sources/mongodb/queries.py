@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-ATLAS_URI = "YOUR_MONGODB_ATLAS_URI_HERE"
+ATLAS_URI = "mongodb+srv://ln2591_db_user:uXwCG4tq2dFsQwbW@cluster0.793zfrw.mongodb.net/trendcast?appName=Cluster0"
 
 client = MongoClient(ATLAS_URI)
 db = client["trendcast"]
@@ -95,3 +95,6 @@ def get_keyword_trends():
         {"$sort": {"count": -1}},
     ]
     return list(db.news_articles.aggregate(pipeline))
+
+if __name__ == "__main__":
+    print(db.list_collection_names())
