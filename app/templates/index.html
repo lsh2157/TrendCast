@@ -161,48 +161,64 @@
         </table>
     </div>
 
-    <script>
-        const googleLabels = {{ google_records | map(attribute='date') | list | tojson }};
-        const googleValues = {{ google_records | map(attribute='counts') | list | tojson }};
+    <script id="google-data" type="application/json">
+{{ google_records | tojson }}
+</script>
 
-        new Chart(document.getElementById('googleChart'), {
-            type: 'line',
-            data: {
-                labels: googleLabels,
-                datasets: [{
-                    label: 'Google Trends Counts',
-                    data: googleValues
-                }]
-            }
-        });
+<script id="news-data" type="application/json">
+{{ news_records | tojson }}
+</script>
 
-        const newsLabels = {{ news_records | map(attribute='keyword') | list | tojson }};
-        const newsValues = {{ news_records | map(attribute='counts') | list | tojson }};
+<script id="amazon-data" type="application/json">
+{{ amazon_records | tojson }}
+</script>
 
-        new Chart(document.getElementById('newsChart'), {
-            type: 'bar',
-            data: {
-                labels: newsLabels,
-                datasets: [{
-                    label: 'News Counts',
-                    data: newsValues
-                }]
-            }
-        });
+<script>
+    const googleRecords = JSON.parse(document.getElementById("google-data").textContent);
+    const newsRecords = JSON.parse(document.getElementById("news-data").textContent);
+    const amazonRecords = JSON.parse(document.getElementById("amazon-data").textContent);
 
-        const amazonLabels = {{ amazon_records | map(attribute='product') | list | tojson }};
-        const amazonValues = {{ amazon_records | map(attribute='count') | list | tojson }};
+    const googleLabels = googleRecords.map(row => row.date);
+    const googleValues = googleRecords.map(row => row.counts);
 
-        new Chart(document.getElementById('amazonChart'), {
-            type: 'bar',
-            data: {
-                labels: amazonLabels,
-                datasets: [{
-                    label: 'Amazon Review Counts',
-                    data: amazonValues
-                }]
-            }
-        });
-    </script>
+    new Chart(document.getElementById("googleChart"), {
+        type: "line",
+        data: {
+            labels: googleLabels,
+            datasets: [{
+                label: "Google Trends Counts",
+                data: googleValues
+            }]
+        }
+    });
+
+    const newsLabels = newsRecords.map(row => `${row.source}: ${row.keyword}`);
+    const newsValues = newsRecords.map(row => row.counts);
+
+    new Chart(document.getElementById("newsChart"), {
+        type: "bar",
+        data: {
+            labels: newsLabels,
+            datasets: [{
+                label: "News Counts",
+                data: newsValues
+            }]
+        }
+    });
+
+    const amazonLabels = amazonRecords.map(row => row.product);
+    const amazonValues = amazonRecords.map(row => row.count);
+
+    new Chart(document.getElementById("amazonChart"), {
+        type: "bar",
+        data: {
+            labels: amazonLabels,
+            datasets: [{
+                label: "Amazon Review Counts",
+                data: amazonValues
+            }]
+        }
+    });
+</script>
 </body>
 </html>

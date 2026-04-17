@@ -21,3 +21,7 @@ We analyze electronics trends across:
 - NoSQL Storage
 - Big Data Processing
 - UI & Integration
+
+## Data Pipeline Setup
+
+See `PIPELINE_README.md` for Kafka + ingestion setup instructions.
