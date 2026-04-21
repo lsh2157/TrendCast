@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- CUSTOM STYLING ----------------
+# ---------------- CUSTOM STYLES ----------------
 st.markdown(
     """
     <style>
@@ -20,7 +20,7 @@ st.markdown(
     .block-container {
         padding-top: 2rem;
         padding-bottom: 2rem;
-        max-width: 1300px;
+        max-width: 1350px;
     }
 
     h1, h2, h3 {
@@ -30,7 +30,7 @@ st.markdown(
     .subtitle {
         color: #475569;
         font-size: 1rem;
-        margin-top: -0.5rem;
+        margin-top: -0.4rem;
         margin-bottom: 1.5rem;
     }
 
@@ -41,19 +41,6 @@ st.markdown(
         box-shadow: 0 1px 10px rgba(0,0,0,0.05);
         margin-bottom: 1.2rem;
         border: 1px solid #e2e8f0;
-    }
-
-    .metric-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        padding: 1rem;
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 8px rgba(0,0,0,0.04);
-    }
-
-    .small-note {
-        color: #64748b;
-        font-size: 0.9rem;
     }
 
     .headline-box {
@@ -68,7 +55,7 @@ st.markdown(
         color: #0f172a;
         font-weight: 600;
         font-size: 0.97rem;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.2rem;
     }
 
     .headline-meta {
@@ -85,6 +72,7 @@ GOOGLE_TRENDS_FILE = "data/table1_google_trends.csv"
 NEWSAPI_COUNTS_FILE = "data/table2_newsapi_keyword_counts.csv"
 NYT_COUNTS_FILE = "data/table2_nyt_keyword_counts.csv"
 AMAZON_FILE = "data/table3_amazon_reviews.csv"
+SEC_FILE = "data/SEC_Financials.csv"
 
 ATLAS_URI = "mongodb+srv://ln2591_db_user:uXwCG4tq2dFsQwbW@cluster0.793zfrw.mongodb.net/trendcast?appName=Cluster0"
 
@@ -105,11 +93,11 @@ def load_mongo_headlines():
 # ---------------- HEADER ----------------
 st.title("📊 TrendCast Dashboard")
 st.markdown(
-    '<div class="subtitle">Electronics market trend monitoring across Google Trends, news sources, and Amazon review data.</div>',
+    '<div class="subtitle">Electronics market trend monitoring across Google Trends, news sources, Amazon reviews, and SEC financial data.</div>',
     unsafe_allow_html=True,
 )
 
-# ---------------- OVERVIEW METRICS ----------------
+# ---------------- LOAD DATA FOR METRICS ----------------
 try:
     google_df = load_csv(GOOGLE_TRENDS_FILE)
     google_keywords = google_df["keyword"].nunique() if "keyword" in google_df.columns else 0
@@ -134,11 +122,19 @@ try:
 except Exception:
     amazon_categories = 0
 
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("Google Trend Keywords", google_keywords)
+try:
+    sec_df = load_csv(SEC_FILE)
+    sec_companies = sec_df["ticker"].nunique() if "ticker" in sec_df.columns else 0
+except Exception:
+    sec_companies = 0
+
+# ---------------- KPI CARDS ----------------
+m1, m2, m3, m4, m5 = st.columns(5)
+m1.metric("Google Keywords", google_keywords)
 m2.metric("NewsAPI Keywords", newsapi_keywords)
 m3.metric("NYT Keywords", nyt_keywords)
 m4.metric("Amazon Categories", amazon_categories)
+m5.metric("SEC Companies", sec_companies)
 
 st.markdown("---")
 
@@ -150,12 +146,10 @@ st.header("📈 Google Trends")
 try:
     google_df = load_csv(GOOGLE_TRENDS_FILE)
 
-    gfilter1, gfilter2 = st.columns([1, 1])
-
-    with gfilter1:
+    gf1, gf2 = st.columns(2)
+    with gf1:
         google_search = st.text_input("Search Google Trends keyword", "", key="google_search")
-
-    with gfilter2:
+    with gf2:
         if "keyword" in google_df.columns:
             google_options = ["All"] + sorted(google_df["keyword"].dropna().astype(str).unique().tolist())
             google_selected = st.selectbox("Filter keyword", google_options, key="google_filter")
@@ -230,12 +224,10 @@ try:
     newsapi_df = load_csv(NEWSAPI_COUNTS_FILE)
     nyt_counts_df = load_csv(NYT_COUNTS_FILE)
 
-    nfilter1, nfilter2 = st.columns(2)
-
-    with nfilter1:
+    nf1, nf2 = st.columns(2)
+    with nf1:
         news_search = st.text_input("Search NewsAPI keyword", "", key="news_search")
-
-    with nfilter2:
+    with nf2:
         nyt_search = st.text_input("Search NYT keyword", "", key="nyt_search")
 
     filtered_newsapi = newsapi_df.copy()
@@ -300,12 +292,10 @@ st.subheader("🗞️ Live Mongo Headlines")
 try:
     news_docs, nyt_docs = load_mongo_headlines()
 
-    hfilter1, hfilter2 = st.columns(2)
-
-    with hfilter1:
+    hf1, hf2 = st.columns(2)
+    with hf1:
         mongo_news_search = st.text_input("Search live news headlines", "", key="mongo_news_search")
-
-    with hfilter2:
+    with hf2:
         mongo_nyt_search = st.text_input("Search live NYT headlines", "", key="mongo_nyt_search")
 
     col1, col2 = st.columns(2)
@@ -398,12 +388,10 @@ st.header("🛍️ Product Insights (Amazon Reviews)")
 try:
     amazon_df = load_csv(AMAZON_FILE)
 
-    afilter1, afilter2 = st.columns([1, 1])
-
-    with afilter1:
+    af1, af2 = st.columns(2)
+    with af1:
         amazon_search = st.text_input("Search Amazon category", "", key="amazon_search")
-
-    with afilter2:
+    with af2:
         if "main_category" in amazon_df.columns:
             category_options = ["All"] + sorted(amazon_df["main_category"].dropna().astype(str).unique().tolist())
             selected_category = st.selectbox("Filter category", category_options, key="amazon_filter")
@@ -452,3 +440,150 @@ try:
 
 except Exception as e:
     st.error(f"Amazon data error: {e}")
+
+st.markdown("---")
+
+# =========================================================
+# SEC FINANCIALS
+# =========================================================
+st.header("💼 Financial Insights (SEC Data)")
+
+try:
+    sec_df = load_csv(SEC_FILE)
+
+    sf1, sf2 = st.columns(2)
+    with sf1:
+        sec_search = st.text_input("Search company or ticker", "", key="sec_search")
+    with sf2:
+        if "ticker" in sec_df.columns:
+            ticker_options = sorted(sec_df["ticker"].dropna().astype(str).unique().tolist())
+            default_tickers = ticker_options[:3] if len(ticker_options) >= 3 else ticker_options
+            selected_tickers = st.multiselect(
+                "Select companies",
+                options=ticker_options,
+                default=default_tickers,
+                key="sec_tickers"
+            )
+        else:
+            selected_tickers = []
+
+    filtered_sec = sec_df.copy()
+
+    if "ticker" in filtered_sec.columns:
+        filtered_sec["ticker"] = filtered_sec["ticker"].astype(str)
+
+    if "name" in filtered_sec.columns:
+        filtered_sec["name"] = filtered_sec["name"].astype(str)
+
+    if sec_search:
+        search_mask = False
+        if "ticker" in filtered_sec.columns:
+            search_mask = filtered_sec["ticker"].str.contains(sec_search, case=False, na=False)
+        if "name" in filtered_sec.columns:
+            name_mask = filtered_sec["name"].str.contains(sec_search, case=False, na=False)
+            search_mask = search_mask | name_mask if isinstance(search_mask, pd.Series) else name_mask
+        if isinstance(search_mask, pd.Series):
+            filtered_sec = filtered_sec[search_mask]
+
+    if selected_tickers and "ticker" in filtered_sec.columns:
+        filtered_sec = filtered_sec[filtered_sec["ticker"].isin(selected_tickers)]
+
+    if "fiscal_year" in filtered_sec.columns:
+        filtered_sec["fiscal_year"] = filtered_sec["fiscal_year"].astype(str)
+
+    if "revenue" in filtered_sec.columns:
+        filtered_sec["revenue"] = (
+            filtered_sec["revenue"]
+            .astype(str)
+            .str.replace(",", "", regex=False)
+            .str.strip()
+    )
+    filtered_sec["revenue"] = pd.to_numeric(filtered_sec["revenue"], errors="coerce")
+    filtered_sec["revenue_billions"] = filtered_sec["revenue"] / 1e9
+
+    if "net_income" in filtered_sec.columns:
+        filtered_sec["net_income"] = (
+            filtered_sec["net_income"]
+            .astype(str)
+            .str.replace(",", "", regex=False)
+            .str.strip()
+    )
+    filtered_sec["net_income"] = pd.to_numeric(filtered_sec["net_income"], errors="coerce")
+    filtered_sec["net_income_billions"] = filtered_sec["net_income"] / 1e9
+
+    if "eps" in filtered_sec.columns:
+        filtered_sec["eps"] = (
+            filtered_sec["eps"]
+            .astype(str)
+            .str.replace(",", "", regex=False)
+            .str.strip()
+    )
+    filtered_sec["eps"] = pd.to_numeric(filtered_sec["eps"], errors="coerce")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("Revenue Over Time")
+        if {"fiscal_year", "ticker", "revenue_billions"}.issubset(filtered_sec.columns):
+            revenue_chart = filtered_sec.pivot_table(
+                index="fiscal_year",
+                columns="ticker",
+                values="revenue_billions",
+                aggfunc="mean"
+            ).sort_index()
+            if not revenue_chart.empty:
+                st.line_chart(revenue_chart)
+                st.caption("Revenue shown in billions USD.")
+            else:
+                st.info("No SEC revenue rows match the current filters.")
+        else:
+            st.info("Expected SEC revenue columns were not found.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("Net Income Over Time")
+        if {"fiscal_year", "ticker", "net_income_billions"}.issubset(filtered_sec.columns):
+            income_chart = filtered_sec.pivot_table(
+                index="fiscal_year",
+                columns="ticker",
+                values="net_income_billions",
+                aggfunc="mean"
+            ).sort_index()
+            if not income_chart.empty:
+                st.line_chart(income_chart)
+                st.caption("Net income shown in billions USD.")
+            else:
+                st.info("No SEC income rows match the current filters.")
+        else:
+            st.info("Expected SEC net income columns were not found.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("EPS Comparison")
+        if {"ticker", "eps"}.issubset(filtered_sec.columns):
+            eps_chart = (
+                filtered_sec.groupby("ticker", as_index=False)["eps"]
+                .mean()
+                .sort_values("eps", ascending=False)
+            )
+            if not eps_chart.empty:
+                st.bar_chart(eps_chart.set_index("ticker"))
+            else:
+                st.info("No EPS rows match the current filters.")
+        else:
+            st.info("Expected SEC EPS columns were not found.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col4:
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.subheader("Financial Data Table")
+        st.dataframe(filtered_sec, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+except Exception as e:
+    st.error(f"SEC financial data error: {e}")
