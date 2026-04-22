@@ -29,15 +29,20 @@ def fetch_golden_trends():
             data = pytrends.interest_over_time()
             
             if not data.empty:
-                latest_index = int(data[word].iloc[-1])
-                payload = {
-                    'keyword': word,
-                    'search_index': latest_index,
-                    'timestamp': time.ctime(),
-                    'source': 'Google Trends'
-                }
-                producer.send(KAFKA_TOPIC, value=payload)
-                print(f"  🔥 {word} Search Index: {latest_index}")
+                # Loop through every data point in the 7-day window
+                for timestamp, row in data.iterrows():
+                    current_index = int(row[word])
+                    formatted_time = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    payload = {
+                        'keyword': word,
+                        'search_index': current_index,
+                        'timestamp': formatted_time,
+                        'source': 'Google Trends'
+                    }
+                    producer.send(KAFKA_TOPIC, value=payload)
+                
+                print(f"  ✅ Sent {len(data)} data points for {word} (Last 7 days)")
             
 
             time.sleep(15)

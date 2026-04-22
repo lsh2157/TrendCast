@@ -5,7 +5,7 @@ from pymongo import MongoClient
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="TrendCast Dashboard",
-    page_icon="📊",
+    page_icon=None,
     layout="wide"
 )
 
@@ -13,8 +13,17 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    /* ── Smooth scrolling ── */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* ── Import Georgia-like serif stack + Calibri-like sans ── */
+    /* Georgia is a system font; Calibri falls back to Trebuchet/sans */
+
+    /* ── Page background ── */
     .main {
-        background-color: #f8fafc;
+        background-color: #EEF4FB;
     }
 
     .block-container {
@@ -23,44 +32,206 @@ st.markdown(
         max-width: 1350px;
     }
 
-    h1, h2, h3 {
-        color: #0f172a;
+    /* ── Headings: Georgia serif, Columbia Navy ── */
+    h1 {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        color: #002147 !important;
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        letter-spacing: -0.01em;
     }
 
+    h2 {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        color: #002147 !important;
+        font-size: 1.45rem !important;
+        font-weight: bold !important;
+        border-left: 4px solid #75AADB;
+        padding-left: 0.6rem;
+        margin-top: 0.5rem !important;
+    }
+
+    h3 {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        color: #002147 !important;
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+    }
+
+    /* ── Body text: Calibri / Trebuchet stack ── */
+    body, p, div, span, label, input, select, textarea,
+    .stMarkdown, .stText {
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
+        color: #1A1A2E;
+    }
+
+    /* ── Subtitle ── */
     .subtitle {
-        color: #475569;
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif;
+        color: #64748B;
         font-size: 1rem;
         margin-top: -0.4rem;
         margin-bottom: 1.5rem;
     }
 
+    /* ── Section cards ── */
     .section-card {
-        background: white;
-        padding: 1.2rem 1.2rem 0.8rem 1.2rem;
-        border-radius: 16px;
-        box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+        background: #FFFFFF;
+        padding: 1.4rem 1.4rem 1rem 1.4rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(0, 33, 71, 0.07);
         margin-bottom: 1.2rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #B9D4F1;
     }
 
+    /* ── Headline boxes (MongoDB articles) ── */
     .headline-box {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 0.8rem 1rem;
-        margin-bottom: 0.6rem;
+        background: #FFFFFF;
+        border: 1px solid #B9D4F1;
+        border-left: 4px solid #75AADB;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.55rem;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .headline-box:hover {
+        box-shadow: 0 4px 14px rgba(0, 33, 71, 0.10);
     }
 
     .headline-title {
-        color: #0f172a;
-        font-weight: 600;
-        font-size: 0.97rem;
+        font-family: Georgia, 'Times New Roman', serif;
+        color: #002147;
+        font-weight: bold;
+        font-size: 0.95rem;
         margin-bottom: 0.2rem;
     }
 
     .headline-meta {
-        color: #64748b;
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif;
+        color: #64748B;
         font-size: 0.82rem;
+    }
+
+    /* ── KPI metric cards ── */
+    [data-testid="metric-container"] {
+        background: #FFFFFF;
+        border: 1px solid #B9D4F1;
+        border-top: 3px solid #002147;
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        box-shadow: 0 2px 8px rgba(0, 33, 71, 0.06);
+    }
+
+    [data-testid="metric-container"] label {
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
+        font-size: 0.78rem !important;
+        font-weight: bold !important;
+        letter-spacing: 0.08em !important;
+        color: #64748B !important;
+        text-transform: uppercase;
+    }
+
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        font-size: 2rem !important;
+        color: #002147 !important;
+        font-weight: bold !important;
+    }
+
+    /* ── Sidebar ── */
+    [data-testid="stSidebar"] {
+        background: #002147 !important;
+    }
+
+    [data-testid="stSidebar"] * {
+        color: #B9D4F1 !important;
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
+    }
+
+    /* ── Input fields ── */
+    .stTextInput > div > div > input,
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div {
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
+        border: 1px solid #B9D4F1 !important;
+        border-radius: 6px !important;
+        background: #FFFFFF !important;
+        color: #002147 !important;
+    }
+
+    .stTextInput > div > div > input:focus {
+        border-color: #75AADB !important;
+        box-shadow: 0 0 0 2px rgba(117, 170, 219, 0.25) !important;
+    }
+
+    /* ── Horizontal rule ── */
+    hr {
+        border: none;
+        border-top: 1px solid #B9D4F1;
+        margin: 1.5rem 0;
+    }
+
+    /* ── Expander ── */
+    [data-testid="stExpander"] {
+        border: 1px solid #B9D4F1 !important;
+        border-radius: 6px !important;
+        background: #FFFFFF;
+    }
+
+    [data-testid="stExpander"] summary {
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
+        font-weight: bold;
+        color: #002147 !important;
+    }
+
+    /* ── Dataframe / table ── */
+    [data-testid="stDataFrame"] {
+        border: 1px solid #B9D4F1;
+        border-radius: 6px;
+    }
+
+    /* ── Charts: override default blue to Columbia Blue ── */
+    [data-testid="stVegaLiteChart"] canvas,
+    [data-testid="stArrowVegaLiteChart"] canvas {
+        border-radius: 6px;
+    }
+
+    /* ── Info / error / caption text ── */
+    .stAlert, .stCaption, .stInfo {
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
+    }
+
+    /* ── Tabs ── */
+    .stTabs [data-baseweb="tab-list"] {
+        border-bottom: 2px solid #B9D4F1;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
+        color: #64748B;
+        font-weight: bold;
+    }
+
+    .stTabs [aria-selected="true"] {
+        color: #002147 !important;
+        border-bottom: 2px solid #002147 !important;
+    }
+
+    /* ── Scrollbar styling ── */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #EEF4FB;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #75AADB;
+        border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #002147;
     }
     </style>
     """,
@@ -91,7 +262,7 @@ def load_mongo_headlines():
     return news_docs, nyt_docs
 
 # ---------------- HEADER ----------------
-st.title("📊 TrendCast Dashboard")
+st.title("TrendCast Dashboard")
 st.markdown(
     '<div class="subtitle">Electronics market trend monitoring across Google Trends, news sources, Amazon reviews, and SEC financial data.</div>',
     unsafe_allow_html=True,
@@ -141,7 +312,7 @@ st.markdown("---")
 # =========================================================
 # GOOGLE TRENDS
 # =========================================================
-st.header("📈 Google Trends")
+st.header("Google Trends")
 
 try:
     google_df = load_csv(GOOGLE_TRENDS_FILE)
@@ -218,7 +389,7 @@ st.markdown("---")
 # =========================================================
 # NEWS COUNTS
 # =========================================================
-st.header("📰 News Trends")
+st.header("News Trends")
 
 try:
     newsapi_df = load_csv(NEWSAPI_COUNTS_FILE)
@@ -287,7 +458,7 @@ except Exception as e:
 # =========================================================
 # LIVE MONGO HEADLINES
 # =========================================================
-st.subheader("🗞️ Live Mongo Headlines")
+st.subheader("Live Headlines")
 
 try:
     news_docs, nyt_docs = load_mongo_headlines()
@@ -325,7 +496,7 @@ try:
                 f"""
                 <div class="headline-box">
                     <div class="headline-title">{title}</div>
-                    <div class="headline-meta">{source} {("• " + str(date)) if date else ""}</div>
+                    <div class="headline-meta">{source} {"&bull; " + str(date) if date else ""}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -362,7 +533,7 @@ try:
                 f"""
                 <div class="headline-box">
                     <div class="headline-title">{title}</div>
-                    <div class="headline-meta">New York Times {("• " + str(date)) if date else ""}</div>
+                    <div class="headline-meta">New York Times {"&bull; " + str(date) if date else ""}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -383,7 +554,7 @@ st.markdown("---")
 # =========================================================
 # AMAZON
 # =========================================================
-st.header("🛍️ Product Insights (Amazon Reviews)")
+st.header("Product Insights (Amazon Reviews)")
 
 try:
     amazon_df = load_csv(AMAZON_FILE)
@@ -446,7 +617,7 @@ st.markdown("---")
 # =========================================================
 # SEC FINANCIALS
 # =========================================================
-st.header("💼 Financial Insights (SEC Data)")
+st.header("Financial Insights (SEC Data)")
 
 try:
     sec_df = load_csv(SEC_FILE)
