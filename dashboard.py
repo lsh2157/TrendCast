@@ -1,3 +1,4 @@
+from pathlib import Path
 import streamlit as st
 import pandas as pd
 from pymongo import MongoClient
@@ -59,8 +60,7 @@ st.markdown(
     }
 
     /* ── Body text: Calibri / Trebuchet stack ── */
-    body, p, div, span, label, input, select, textarea,
-    .stMarkdown, .stText {
+    body, p, .stMarkdown, .stText, .stCaption, .stAlert, .stInfo {
         font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
         color: #1A1A2E;
     }
@@ -72,16 +72,6 @@ st.markdown(
         font-size: 1rem;
         margin-top: -0.4rem;
         margin-bottom: 1.5rem;
-    }
-
-    /* ── Section cards ── */
-    .section-card {
-        background: #FFFFFF;
-        padding: 1.4rem 1.4rem 1rem 1.4rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 12px rgba(0, 33, 71, 0.07);
-        margin-bottom: 1.2rem;
-        border: 1px solid #B9D4F1;
     }
 
     /* ── Headline boxes (MongoDB articles) ── */
@@ -150,9 +140,9 @@ st.markdown(
     }
 
     /* ── Input fields ── */
-    .stTextInput > div > div > input,
-    .stSelectbox > div > div,
-    .stMultiSelect > div > div {
+    .stTextInput input,
+    .stSelectbox [data-baseweb="select"],
+    .stMultiSelect [data-baseweb="select"] {
         font-family: Calibri, Trebuchet MS, Arial, sans-serif !important;
         border: 1px solid #B9D4F1 !important;
         border-radius: 6px !important;
@@ -160,7 +150,7 @@ st.markdown(
         color: #002147 !important;
     }
 
-    .stTextInput > div > div > input:focus {
+    .stTextInput input:focus {
         border-color: #75AADB !important;
         box-shadow: 0 0 0 2px rgba(117, 170, 219, 0.25) !important;
     }
@@ -238,18 +228,22 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# ---------------- BASE PATH ----------------
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+
 # ---------------- FILE PATHS ----------------
-GOOGLE_TRENDS_FILE = "data/table1_google_trends.csv"
-NEWSAPI_COUNTS_FILE = "data/table2_newsapi_keyword_counts.csv"
-NYT_COUNTS_FILE = "data/table2_nyt_keyword_counts.csv"
-AMAZON_FILE = "data/table3_amazon_reviews.csv"
-SEC_FILE = "data/SEC_Financials.csv"
+GOOGLE_TRENDS_FILE = DATA_DIR / "table1_google_trends.csv"
+NEWSAPI_COUNTS_FILE = DATA_DIR / "table2_newsapi_keyword_counts.csv"
+NYT_COUNTS_FILE = DATA_DIR / "table2_nyt_keyword_counts.csv"
+AMAZON_FILE = DATA_DIR / "table3_amazon_reviews.csv"
+SEC_FILE = DATA_DIR / "SEC_Financials.csv"
 
 ATLAS_URI = "mongodb+srv://ln2591_db_user:uXwCG4tq2dFsQwbW@cluster0.793zfrw.mongodb.net/trendcast?appName=Cluster0"
 
 # ---------------- HELPERS ----------------
 @st.cache_data
-def load_csv(path: str) -> pd.DataFrame:
+def load_csv(path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 @st.cache_data(ttl=60)
@@ -341,7 +335,6 @@ try:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("Keyword Popularity")
         if {"keyword", "counts"}.issubset(filtered_google.columns):
             keyword_df = (
@@ -356,10 +349,8 @@ try:
                 st.info("No Google Trends rows match the current filters.")
         else:
             st.info("Expected columns 'keyword' and 'counts' were not found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("Trend Over Time")
         if {"date", "counts"}.issubset(filtered_google.columns):
             time_df = filtered_google.copy()
@@ -376,7 +367,6 @@ try:
                 st.info("No valid date rows found.")
         else:
             st.info("Expected columns 'date' and 'counts' were not found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with st.expander("View Google Trends data"):
         st.dataframe(filtered_google, use_container_width=True)
@@ -421,7 +411,6 @@ try:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("NewsAPI Keyword Counts")
         if {"keyword", "counts"}.issubset(filtered_newsapi.columns):
             chart_df = filtered_newsapi.sort_values("counts", ascending=False).head(10)
@@ -434,10 +423,8 @@ try:
 
         with st.expander("View NewsAPI table"):
             st.dataframe(filtered_newsapi, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("NYT Keyword Counts")
         if {"keyword", "counts"}.issubset(filtered_nyt.columns):
             chart_df = filtered_nyt.sort_values("counts", ascending=False).head(10)
@@ -450,7 +437,6 @@ try:
 
         with st.expander("View NYT table"):
             st.dataframe(filtered_nyt, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 except Exception as e:
     st.error(f"News trend data error: {e}")
@@ -472,7 +458,6 @@ try:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.markdown("### Latest News Articles")
         seen = set()
         shown = 0
@@ -507,10 +492,8 @@ try:
 
         if shown == 0:
             st.caption("No matching non-test news articles found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.markdown("### Latest NYT Headlines")
         seen = set()
         shown = 0
@@ -544,7 +527,6 @@ try:
 
         if shown == 0:
             st.caption("No matching non-test NYT headlines found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
 except Exception as e:
     st.error(f"MongoDB error: {e}")
@@ -585,7 +567,6 @@ try:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("Top Categories by Total Reviews")
         if {"main_category", "total_reviews"}.issubset(filtered_amazon.columns):
             amazon_chart = filtered_amazon.sort_values("total_reviews", ascending=False).head(10)
@@ -595,10 +576,8 @@ try:
                 st.info("No Amazon rows match the current filters.")
         else:
             st.info("Expected columns 'main_category' and 'total_reviews' were not found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("Amazon Review Summary")
         if "total_reviews" in filtered_amazon.columns:
             st.dataframe(
@@ -607,7 +586,6 @@ try:
             )
         else:
             st.dataframe(filtered_amazon, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 except Exception as e:
     st.error(f"Amazon data error: {e}")
@@ -694,7 +672,6 @@ try:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("Revenue Over Time")
         if {"fiscal_year", "ticker", "revenue_billions"}.issubset(filtered_sec.columns):
             revenue_chart = filtered_sec.pivot_table(
@@ -710,10 +687,8 @@ try:
                 st.info("No SEC revenue rows match the current filters.")
         else:
             st.info("Expected SEC revenue columns were not found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("Net Income Over Time")
         if {"fiscal_year", "ticker", "net_income_billions"}.issubset(filtered_sec.columns):
             income_chart = filtered_sec.pivot_table(
@@ -729,12 +704,10 @@ try:
                 st.info("No SEC income rows match the current filters.")
         else:
             st.info("Expected SEC net income columns were not found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     col3, col4 = st.columns(2)
 
     with col3:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("EPS Comparison")
         if {"ticker", "eps"}.issubset(filtered_sec.columns):
             eps_chart = (
@@ -748,13 +721,10 @@ try:
                 st.info("No EPS rows match the current filters.")
         else:
             st.info("Expected SEC EPS columns were not found.")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col4:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.subheader("Financial Data Table")
         st.dataframe(filtered_sec, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 except Exception as e:
     st.error(f"SEC financial data error: {e}")
